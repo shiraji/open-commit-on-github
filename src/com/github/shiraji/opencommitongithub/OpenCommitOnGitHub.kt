@@ -34,10 +34,10 @@ class OpenCommitOnGitHub : AnAction() {
 
         Notifications.Bus.notify(Notification("Plugin Importer+Exporter",
                 "Plugin Importer+Exporter",
-                """"hash: $revisionHash
+                """hash: $revisionHash
                 currentRev: ${annotate.currentRevision}
                 virtualFile: $virtualFile
-                gitDir: ${eventData.repository.gitDir}""",
+                gitDir: ${eventData.repository.gitDir.parent}""",
                 NotificationType.INFORMATION))
     }
 
