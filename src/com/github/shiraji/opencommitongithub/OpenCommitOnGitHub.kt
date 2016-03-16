@@ -36,6 +36,24 @@ class OpenCommitOnGitHub : AnAction() {
         val fileName = virtualFile.presentableUrl.substring(eventData.repository.gitDir.parent.presentableUrl.length + 1, virtualFile.presentableUrl.length)
         val hashString = BigInteger(1, MessageDigest.getInstance("MD5").digest(fileName.toByteArray())).toString(16)
 
+
+        val origin = eventData.repository.remotes.find {
+            it.name == "origin"
+        }
+
+
+
+        if(origin == null) {
+            // let user select repository
+        } else {
+            var url = origin.firstUrl ?: return
+            if(!url.startsWith("http")) {
+                url = url.replace(":", "/").replace("git@", "https://")
+            }
+            url = url.replace(".git", "")
+            System.out.println(url)
+        }
+
         Notifications.Bus.notify(Notification("Plugin Importer+Exporter",
                 "Plugin Importer+Exporter",
                 """hash: $revisionHash
