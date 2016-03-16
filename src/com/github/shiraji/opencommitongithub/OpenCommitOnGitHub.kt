@@ -12,6 +12,8 @@ import git4idea.GitVcs
 import git4idea.annotate.GitFileAnnotation
 import git4idea.repo.GitRepository
 import org.jetbrains.plugins.github.util.GithubUtil
+import java.math.BigInteger
+import java.security.MessageDigest
 
 class OpenCommitOnGitHub : AnAction() {
 
@@ -31,13 +33,17 @@ class OpenCommitOnGitHub : AnAction() {
 
         lineNumber.plus(1)
         val revisionHash = annotate.originalRevision(lineNumber)
+        val fileName = virtualFile.presentableUrl.substring(eventData.repository.gitDir.parent.presentableUrl.length + 1, virtualFile.presentableUrl.length)
+        val hashString = BigInteger(1, MessageDigest.getInstance("MD5").digest(fileName.toByteArray())).toString(16)
 
         Notifications.Bus.notify(Notification("Plugin Importer+Exporter",
                 "Plugin Importer+Exporter",
                 """hash: $revisionHash
                 currentRev: ${annotate.currentRevision}
                 virtualFile: $virtualFile
-                gitDir: ${eventData.repository.gitDir.parent}""",
+                gitDir: ${eventData.repository.gitDir.parent}
+                fileName: $fileName
+                """,
                 NotificationType.INFORMATION))
     }
 
