@@ -31,9 +31,9 @@ class OpenCommitOnGitHub : AnAction() {
 
         val vcs = eventData.repository.vcs as GitVcs?
         val annotate = vcs?.annotationProvider?.annotate(virtualFile) as GitFileAnnotation? ?: return
-        val lineNumber = editor?.document?.getLineNumber(editor.selectionModel.selectionStart) ?: return
+        var lineNumber = editor?.document?.getLineNumber(editor.selectionModel.selectionStart) ?: return
 
-        lineNumber.plus(1)
+        lineNumber = lineNumber.plus(1)
         val revisionHash = annotate.originalRevision(lineNumber)
         val fileName = virtualFile.presentableUrl.substring(eventData.repository.gitDir.parent.presentableUrl.length + 1, virtualFile.presentableUrl.length)
         val hashString = BigInteger(1, MessageDigest.getInstance("MD5").digest(fileName.toByteArray())).toString(16)
@@ -47,7 +47,7 @@ class OpenCommitOnGitHub : AnAction() {
             // let user select repository
         } else {
             val userAndRepository = GithubUrlUtil.getUserAndRepositoryFromRemoteUrl(origin.firstUrl ?: return) ?: return
-            val githubUrl = GithubUrlUtil.getGithubHost() + '/' + userAndRepository.user + '/' + userAndRepository.repository + "/commit/" + revisionHash + "#diff-" + hashString
+            val githubUrl = GithubUrlUtil.getGithubHost() + '/' + userAndRepository.user + '/' + userAndRepository.repository + "/commit/" + revisionHash + "#diff-" + hashString + "R" + lineNumber
             BrowserUtil.browse(githubUrl)
         }
     }
