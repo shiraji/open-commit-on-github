@@ -1,5 +1,6 @@
 package com.github.shiraji.opencommitongithub
 
+import com.intellij.ide.BrowserUtil
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
@@ -11,6 +12,7 @@ import com.intellij.openapi.project.Project
 import git4idea.GitVcs
 import git4idea.annotate.GitFileAnnotation
 import git4idea.repo.GitRepository
+import org.jetbrains.plugins.github.util.GithubUrlUtil
 import org.jetbrains.plugins.github.util.GithubUtil
 import java.math.BigInteger
 import java.security.MessageDigest
@@ -41,28 +43,12 @@ class OpenCommitOnGitHub : AnAction() {
             it.name == "origin"
         }
 
-
-
         if(origin == null) {
             // let user select repository
         } else {
-            var url = origin.firstUrl ?: return
-            if(!url.startsWith("http")) {
-                url = url.replace(":", "/").replace("git@", "https://")
-            }
-            url = url.replace(".git", "")
-            System.out.println(url)
+            val userAndRepository = GithubUrlUtil.getUserAndRepositoryFromRemoteUrl(origin.firstUrl ?: return) ?: return
+            val githubUrl = GithubUrlUtil.getGithubHost() + '/' + userAndRepository.user + '/' + userAndRepository.repository + "/commit/" + revisionHash + "#diff-" + hashString
         }
-
-        Notifications.Bus.notify(Notification("Plugin Importer+Exporter",
-                "Plugin Importer+Exporter",
-                """hash: $revisionHash
-                currentRev: ${annotate.currentRevision}
-                virtualFile: $virtualFile
-                gitDir: ${eventData.repository.gitDir.parent}
-                fileName: $fileName
-                """,
-                NotificationType.INFORMATION))
     }
 
     private fun calcData(e : AnActionEvent): EventData? {
