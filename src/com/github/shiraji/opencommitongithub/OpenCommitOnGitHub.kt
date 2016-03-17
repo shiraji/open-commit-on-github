@@ -42,7 +42,7 @@ class OpenCommitOnGitHub : AnAction() {
             showNoOriginUrlMessage()
             return null
         }
-        return GithubUrlUtil.makeGithubRepoUrlFromRemoteUrl(originUrl, "https://" + GithubUrlUtil.getHostFromUrl(originUrl)) ?: return null
+        return GithubUrlUtil.makeGithubRepoUrlFromRemoteUrl(originUrl, "https://" + GithubUrlUtil.getHostFromUrl(originUrl))
     }
 
     private fun createCommitUrlPath(project: Project, editor: Editor, virtualFile: VirtualFile): String? {
