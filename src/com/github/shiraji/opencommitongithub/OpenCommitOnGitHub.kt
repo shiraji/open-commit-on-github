@@ -13,6 +13,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import git4idea.GitFileRevision
+import git4idea.repo.GitRepository
 import org.jetbrains.plugins.github.util.GithubUrlUtil
 import org.jetbrains.plugins.github.util.GithubUtil
 
@@ -30,13 +31,13 @@ class OpenCommitOnGitHub : AnAction() {
     }
 
     private fun createCommitUrl(project: Project, editor: Editor, virtualFile: VirtualFile): String? {
-        val githubUrl = createGithubUrl(project, virtualFile) ?: return null
-        val commitUrlPath = createCommitUrlPath(project, editor, virtualFile) ?: return null
+        val repository = GithubUtil.getGitRepository(project, virtualFile) ?: return null
+        val githubUrl = createGithubUrl(repository) ?: return null
+        val commitUrlPath = createCommitUrlPath(editor, virtualFile, repository) ?: return null
         return "$githubUrl/commit/$commitUrlPath"
     }
 
-    private fun createGithubUrl(project: Project, virtualFile: VirtualFile): String? {
-        val repository = GithubUtil.getGitRepository(project, virtualFile) ?: return null
+    private fun createGithubUrl(repository: GitRepository): String? {
         val originUrl = repository.remotes.singleOrNull { it.name == "origin" }?.firstUrl
         if (originUrl == null) {
             showNoOriginUrlMessage()
@@ -45,8 +46,7 @@ class OpenCommitOnGitHub : AnAction() {
         return GithubUrlUtil.makeGithubRepoUrlFromRemoteUrl(originUrl, "https://" + GithubUrlUtil.getHostFromUrl(originUrl))
     }
 
-    private fun createCommitUrlPath(project: Project, editor: Editor, virtualFile: VirtualFile): String? {
-        val repository = GithubUtil.getGitRepository(project, virtualFile) ?: return null
+    private fun createCommitUrlPath(editor: Editor, virtualFile: VirtualFile, repository: GitRepository): String? {
         val annotate = repository.vcs?.annotationProvider?.annotate(virtualFile) ?: return null
         val lineNumber = editor.document.getLineNumber(editor.selectionModel.selectionStart).plus(1)
         val revisionHash = annotate.originalRevision(lineNumber)
