@@ -45,8 +45,9 @@ class OpenCommitOnGitHub : AnAction() {
         if(origin == null) {
             // let user select repository
         } else {
-            val userAndRepository = GithubUrlUtil.getUserAndRepositoryFromRemoteUrl(origin.firstUrl ?: return) ?: return
-            val githubUrl = GithubUrlUtil.getGithubHost() + '/' + userAndRepository.user + '/' + userAndRepository.repository + "/commit/" + revisionHash + "#diff-" + hashString + "R" + lineNumber
+            val firstUrl = origin.firstUrl ?: return
+            val userAndRepository = GithubUrlUtil.getUserAndRepositoryFromRemoteUrl(firstUrl) ?: return
+            val githubUrl = "https://" + GithubUrlUtil.getHostFromUrl(firstUrl) + '/' + userAndRepository.user + '/' + userAndRepository.repository + "/commit/" + revisionHash + "#diff-" + hashString + "R" + lineNumber
             BrowserUtil.browse(githubUrl)
         }
     }
