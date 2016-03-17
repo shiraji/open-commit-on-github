@@ -1,5 +1,7 @@
 package com.github.shiraji.opencommitongithub
 
+import com.github.shiraji.subtract
+import com.github.shiraji.toMd5
 import com.intellij.ide.BrowserUtil
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -7,48 +9,57 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
-import git4idea.GitVcs
-import git4idea.annotate.GitFileAnnotation
-import git4idea.repo.GitRepository
+import com.intellij.openapi.vfs.VirtualFile
+import git4idea.GitFileRevision
 import org.jetbrains.plugins.github.util.GithubUrlUtil
 import org.jetbrains.plugins.github.util.GithubUtil
-import java.math.BigInteger
-import java.security.MessageDigest
 
 class OpenCommitOnGitHub : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.getData(CommonDataKeys.PROJECT) ?: return
-        if (project.isDisposed) {
-            return;
-        }
-        val virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
+        if (project.isDisposed) return
         val editor = e.getData(CommonDataKeys.EDITOR) ?: return
-        val repository = GithubUtil.getGitRepository(project, virtualFile) ?: return
+        val virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
 
-        val vcs = repository.vcs as GitVcs?
-        val annotate = vcs?.annotationProvider?.annotate(virtualFile) as GitFileAnnotation? ?: return
-        var lineNumber = editor.document.getLineNumber(editor.selectionModel.selectionStart)
+        val commitUrl = createCommitUrl(project, editor, virtualFile) ?: return
 
-        lineNumber = lineNumber.plus(1)
-        val revisionHash = annotate.originalRevision(lineNumber)
-        val fileName = virtualFile.presentableUrl.substring(repository.gitDir.parent.presentableUrl.length + 1, virtualFile.presentableUrl.length)
-        val hashString = BigInteger(1, MessageDigest.getInstance("MD5").digest(fileName.toByteArray())).toString(16)
-
-
-        val origin = repository.remotes.find {
-            it.name == "origin"
-        }
-
-        if(origin == null) {
-            // let user select repository
-        } else {
-            val firstUrl = origin.firstUrl ?: return
-            val userAndRepository = GithubUrlUtil.getUserAndRepositoryFromRemoteUrl(firstUrl) ?: return
-            val githubUrl = "https://" + GithubUrlUtil.getHostFromUrl(firstUrl) + '/' + userAndRepository.user + '/' + userAndRepository.repository + "/commit/" + revisionHash + "#diff-" + hashString + "R" + lineNumber
-            BrowserUtil.browse(githubUrl)
-        }
+        BrowserUtil.browse(commitUrl)
     }
+
+    private fun createCommitUrl(project: Project, editor: Editor, virtualFile: VirtualFile): String? {
+        val githubUrl = createGithubUrl(project, virtualFile) ?: return null
+        val commitUrlPath = createCommitUrlPath(project, editor, virtualFile) ?: return null
+        return "$githubUrl/commit/$commitUrlPath"
+    }
+
+    private fun createGithubUrl(project: Project, virtualFile: VirtualFile): String? {
+        val repository = GithubUtil.getGitRepository(project, virtualFile) ?: return null
+        val originUrl = repository.remotes.singleOrNull { it.name == "origin" }?.firstUrl
+        if (originUrl == null) {
+            showNoOriginUrlMessage()
+            return null
+        }
+        return GithubUrlUtil.makeGithubRepoUrlFromRemoteUrl(originUrl, "https://" + GithubUrlUtil.getHostFromUrl(originUrl)) ?: return null
+    }
+
+    private fun createCommitUrlPath(project: Project, editor: Editor, virtualFile: VirtualFile): String? {
+        val repository = GithubUtil.getGitRepository(project, virtualFile) ?: return null
+        val annotate = repository.vcs?.annotationProvider?.annotate(virtualFile) ?: return null
+        val lineNumber = editor.document.getLineNumber(editor.selectionModel.selectionStart).plus(1)
+        val revisionHash = annotate.originalRevision(lineNumber)
+        val fileRev = annotate.revisions?.single { it.revisionNumber == revisionHash } as GitFileRevision
+        val hashString = fileRev.path.path.subtract(repository.gitDir.parent.presentableUrl.toString() + "/").toMd5()
+        return "$revisionHash#diff-$hashString"
+    }
+
+    private fun showNoOriginUrlMessage() {
+        Notifications.Bus.notify(Notification("OpenCommitOnGitHub",
+                "No origin url found",
+                "open-commit-on-github requires \"origin\" url.",
+                NotificationType.ERROR))
+    }
+
 }
