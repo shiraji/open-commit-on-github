@@ -8,6 +8,8 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vcs.annotate.FileAnnotation
+import com.intellij.openapi.vcs.history.VcsRevisionNumber
 import com.intellij.openapi.vfs.VirtualFile
 import git4idea.GitFileRevision
 import git4idea.repo.GitRepository
@@ -45,11 +47,19 @@ class OpenCommitOnGitHub : AnAction() {
 
     private fun createCommitUrlPath(editor: Editor, virtualFile: VirtualFile, repository: GitRepository): String? {
         val annotate = repository.vcs?.annotationProvider?.annotate(virtualFile) ?: return null
-        val lineNumber = editor.document.getLineNumber(editor.selectionModel.selectionStart).plus(1)
-        val revisionHash = annotate.originalRevision(lineNumber)
-        val revision = annotate.revisions?.single { it.revisionNumber == revisionHash } as GitFileRevision
-        val filePathHash = revision.path.path.subtract(repository.gitDir.parent.presentableUrl.toString() + "/").toMd5()
+        val revisionHash = createRevisionHash(editor, annotate) ?: return null
+        val filePathHash = createFilePathHash(repository, annotate, revisionHash)
         return "$revisionHash#diff-$filePathHash"
+    }
+
+    private fun createRevisionHash(editor: Editor, annotate: FileAnnotation): VcsRevisionNumber? {
+        val lineNumber = editor.document.getLineNumber(editor.selectionModel.selectionStart).plus(1)
+        return annotate.originalRevision(lineNumber)
+    }
+
+    private fun createFilePathHash(repository: GitRepository, annotate: FileAnnotation, revisionHash: VcsRevisionNumber): String {
+        val revision = annotate.revisions?.single { it.revisionNumber == revisionHash } as GitFileRevision
+        return revision.path.path.subtract(repository.gitDir.parent.presentableUrl.toString() + "/").toMd5()
     }
 
     override fun update(e: AnActionEvent?) {
