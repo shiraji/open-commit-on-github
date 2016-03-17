@@ -62,4 +62,8 @@ class OpenCommitOnGitHub : AnAction() {
                 NotificationType.ERROR))
     }
 
+    override fun update(e: AnActionEvent?) {
+        super.update(e)
+    }
+
 }
