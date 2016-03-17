@@ -50,9 +50,9 @@ class OpenCommitOnGitHub : AnAction() {
         val annotate = repository.vcs?.annotationProvider?.annotate(virtualFile) ?: return null
         val lineNumber = editor.document.getLineNumber(editor.selectionModel.selectionStart).plus(1)
         val revisionHash = annotate.originalRevision(lineNumber)
-        val fileRev = annotate.revisions?.single { it.revisionNumber == revisionHash } as GitFileRevision
-        val hashString = fileRev.path.path.subtract(repository.gitDir.parent.presentableUrl.toString() + "/").toMd5()
-        return "$revisionHash#diff-$hashString"
+        val revision = annotate.revisions?.single { it.revisionNumber == revisionHash } as GitFileRevision
+        val filePathHash = revision.path.path.subtract(repository.gitDir.parent.presentableUrl.toString() + "/").toMd5()
+        return "$revisionHash#diff-$filePathHash"
     }
 
     private fun showNoOriginUrlMessage() {
