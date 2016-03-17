@@ -3,9 +3,6 @@ package com.github.shiraji.opencommitongithub
 import com.github.shiraji.subtract
 import com.github.shiraji.toMd5
 import com.intellij.ide.BrowserUtil
-import com.intellij.notification.Notification
-import com.intellij.notification.NotificationType
-import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -40,7 +37,7 @@ class OpenCommitOnGitHub : AnAction() {
     private fun createGithubUrl(repository: GitRepository): String? {
         val originUrl = repository.remotes.singleOrNull { it.name == "origin" }?.firstUrl
         if (originUrl == null) {
-            showNoOriginUrlMessage()
+            OpenCommitOnGitHubHelper().showNoOriginUrlMessage()
             return null
         }
         return GithubUrlUtil.makeGithubRepoUrlFromRemoteUrl(originUrl, "https://" + GithubUrlUtil.getHostFromUrl(originUrl))
@@ -53,13 +50,6 @@ class OpenCommitOnGitHub : AnAction() {
         val revision = annotate.revisions?.single { it.revisionNumber == revisionHash } as GitFileRevision
         val filePathHash = revision.path.path.subtract(repository.gitDir.parent.presentableUrl.toString() + "/").toMd5()
         return "$revisionHash#diff-$filePathHash"
-    }
-
-    private fun showNoOriginUrlMessage() {
-        Notifications.Bus.notify(Notification("OpenCommitOnGitHub",
-                "No origin url found",
-                "open-commit-on-github requires \"origin\" url.",
-                NotificationType.ERROR))
     }
 
     override fun update(e: AnActionEvent?) {
