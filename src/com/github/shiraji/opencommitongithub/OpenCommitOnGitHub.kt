@@ -20,26 +20,25 @@ import java.security.MessageDigest
 class OpenCommitOnGitHub : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
-        val project = e.getData(CommonDataKeys.PROJECT);
-        val virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE);
-        val editor = e.getData(CommonDataKeys.EDITOR);
-        if (virtualFile == null || project == null || project.isDisposed) {
+        val project = e.getData(CommonDataKeys.PROJECT) ?: return
+        if (project.isDisposed) {
             return;
         }
+        val virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
+        val editor = e.getData(CommonDataKeys.EDITOR) ?: return
+        val repository = GithubUtil.getGitRepository(project, virtualFile) ?: return
 
-        val eventData = calcData(e) ?: return
-
-        val vcs = eventData.repository.vcs as GitVcs?
+        val vcs = repository.vcs as GitVcs?
         val annotate = vcs?.annotationProvider?.annotate(virtualFile) as GitFileAnnotation? ?: return
-        var lineNumber = editor?.document?.getLineNumber(editor.selectionModel.selectionStart) ?: return
+        var lineNumber = editor?.document?.getLineNumber(editor.selectionModel.selectionStart)
 
         lineNumber = lineNumber.plus(1)
         val revisionHash = annotate.originalRevision(lineNumber)
-        val fileName = virtualFile.presentableUrl.substring(eventData.repository.gitDir.parent.presentableUrl.length + 1, virtualFile.presentableUrl.length)
+        val fileName = virtualFile.presentableUrl.substring(repository.gitDir.parent.presentableUrl.length + 1, virtualFile.presentableUrl.length)
         val hashString = BigInteger(1, MessageDigest.getInstance("MD5").digest(fileName.toByteArray())).toString(16)
 
 
-        val origin = eventData.repository.remotes.find {
+        val origin = repository.remotes.find {
             it.name == "origin"
         }
 
@@ -50,16 +49,5 @@ class OpenCommitOnGitHub : AnAction() {
             val githubUrl = GithubUrlUtil.getGithubHost() + '/' + userAndRepository.user + '/' + userAndRepository.repository + "/commit/" + revisionHash + "#diff-" + hashString + "R" + lineNumber
             BrowserUtil.browse(githubUrl)
         }
-    }
-
-    private fun calcData(e : AnActionEvent): EventData? {
-        val project = e.getData(CommonDataKeys.PROJECT) ?: return null
-        val virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return null
-        val document = FileDocumentManager.getInstance().getDocument(virtualFile) ?: return null
-        val repository = GithubUtil.getGitRepository(project, virtualFile) ?: return null
-        return EventData(project, repository)
-    }
-
-    private data class EventData(val project: Project, val repository: GitRepository) {
     }
 }
