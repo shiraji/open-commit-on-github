@@ -30,7 +30,7 @@ class OpenCommitOnGitHub : AnAction() {
 
         val vcs = repository.vcs as GitVcs?
         val annotate = vcs?.annotationProvider?.annotate(virtualFile) as GitFileAnnotation? ?: return
-        var lineNumber = editor?.document?.getLineNumber(editor.selectionModel.selectionStart)
+        var lineNumber = editor.document.getLineNumber(editor.selectionModel.selectionStart)
 
         lineNumber = lineNumber.plus(1)
         val revisionHash = annotate.originalRevision(lineNumber)
