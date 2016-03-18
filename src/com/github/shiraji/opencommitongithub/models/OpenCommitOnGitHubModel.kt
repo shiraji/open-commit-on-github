@@ -33,8 +33,21 @@ class OpenCommitOnGitHubModel {
             return false
         }
 
-        GitUtil.getRepositoryManager(project).getRepositoryForFile(virtualFile) ?: return false
-        return editor.selectionModel.selectionStart == editor.selectionModel.selectionEnd
+        val repository = GitUtil.getRepositoryManager(project).getRepositoryForFile(virtualFile) ?: return false
+        val annotate = repository.vcs?.annotationProvider?.annotate(virtualFile) ?: return false
+
+        val revisionSet = mutableSetOf<VcsRevisionNumber>()
+
+        // if select more than 3 lines, disable it
+        if (editor.selectionModel.selectionEnd - editor.selectionModel.selectionStart > 3) return false
+
+        for(i in editor.selectionModel.selectionStart + 1 .. editor.selectionModel.selectionEnd + 1) {
+            val rev = annotate.originalRevision(i) ?: return false
+            revisionSet.add(rev)
+            if(revisionSet.size >= 2) return false
+        }
+
+        return true
     }
 
     fun createCommitUrl(): String? {
