@@ -11,6 +11,7 @@ import com.intellij.openapi.vcs.annotate.FileAnnotation
 import com.intellij.openapi.vcs.history.VcsRevisionNumber
 import com.intellij.openapi.vfs.VirtualFile
 import git4idea.GitFileRevision
+import git4idea.GitUtil
 import git4idea.repo.GitRepository
 import org.jetbrains.plugins.github.util.GithubUrlUtil
 import org.jetbrains.plugins.github.util.GithubUtil
@@ -25,6 +26,15 @@ class OpenCommitOnGitHubModel {
         project = e.getData(CommonDataKeys.PROJECT)
         editor = e.getData(CommonDataKeys.EDITOR)
         virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE)
+    }
+
+    fun isEnable(): Boolean {
+        if(project== null || project.isDisposed || editor == null || virtualFile == null) {
+            return false
+        }
+
+        val repository = GitUtil.getRepositoryManager(project).getRepositoryForFile(virtualFile) ?: return false
+        return editor.selectionModel.selectionStart == editor.selectionModel.selectionEnd
     }
 
     fun createCommitUrl(): String? {
