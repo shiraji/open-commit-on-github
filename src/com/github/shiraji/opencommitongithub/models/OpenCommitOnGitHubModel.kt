@@ -33,7 +33,7 @@ class OpenCommitOnGitHubModel {
             return false
         }
 
-        val repository = GitUtil.getRepositoryManager(project).getRepositoryForFile(virtualFile) ?: return false
+        GitUtil.getRepositoryManager(project).getRepositoryForFile(virtualFile) ?: return false
         return editor.selectionModel.selectionStart == editor.selectionModel.selectionEnd
     }
 
