@@ -26,7 +26,7 @@
   <actions>
     <action id="OpenCommitOnGitHub" class="com.github.shiraji.opencommitongithub.actions.OpenCommitOnGitHubAction"
             text="Open Commit on GitHub" description="Open commit of the line on GitHub">
-      <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+      <add-to-group group-id="EditorPopupMenu" anchor="after" relative-to-action="Github.Open.In.Browser"/>
     </action>
   </actions>
 
