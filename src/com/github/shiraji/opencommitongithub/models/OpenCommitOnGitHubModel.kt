@@ -84,6 +84,6 @@ class OpenCommitOnGitHubModel {
 
     private fun createFilePathHash(repository: GitRepository, annotate: FileAnnotation, revisionHash: VcsRevisionNumber): String {
         val revision = annotate.revisions?.single { it.revisionNumber == revisionHash } as GitFileRevision
-        return revision.path.path.subtract(repository.gitDir.parent.presentableUrl.toString() + "/").toMd5()
+        return revision.path.path.subtract("${repository.gitDir.parent.presentableUrl.toString()}/").toMd5()
     }
 }
