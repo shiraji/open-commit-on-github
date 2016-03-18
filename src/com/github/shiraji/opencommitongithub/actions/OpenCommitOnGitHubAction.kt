@@ -13,7 +13,13 @@ class OpenCommitOnGitHubAction : AnAction() {
     }
 
     override fun update(e: AnActionEvent?) {
+        e ?: return
         super.update(e)
+
+        if(!OpenCommitOnGitHubModel(e).isEnable()) {
+            e.presentation.isEnabled = false
+            e.presentation.isVisible = false
+        }
     }
 
 }
