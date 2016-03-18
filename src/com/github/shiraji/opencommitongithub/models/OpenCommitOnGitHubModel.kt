@@ -11,7 +11,6 @@ import com.intellij.openapi.vcs.annotate.FileAnnotation
 import com.intellij.openapi.vcs.history.VcsRevisionNumber
 import com.intellij.openapi.vfs.VirtualFile
 import git4idea.GitFileRevision
-import git4idea.GitUtil
 import git4idea.repo.GitRepository
 import org.jetbrains.plugins.github.util.GithubUrlUtil
 import org.jetbrains.plugins.github.util.GithubUtil
@@ -32,22 +31,9 @@ class OpenCommitOnGitHubModel {
         if(project== null || project.isDisposed || editor == null || virtualFile == null) {
             return false
         }
-
-        val repository = GitUtil.getRepositoryManager(project).getRepositoryForFile(virtualFile) ?: return false
-        val annotate = repository.vcs?.annotationProvider?.annotate(virtualFile) ?: return false
-
-        val revisionSet = mutableSetOf<VcsRevisionNumber>()
-
-        // if select more than 3 lines, disable it
-        if (editor.selectionModel.selectionEnd - editor.selectionModel.selectionStart > 3) return false
-
-        for(i in editor.selectionModel.selectionStart + 1 .. editor.selectionModel.selectionEnd + 1) {
-            val rev = annotate.originalRevision(i) ?: return false
-            revisionSet.add(rev)
-            if(revisionSet.size >= 2) return false
-        }
-
-        return true
+        val startLine = editor.document.getLineNumber(editor.selectionModel.selectionStart)
+        val endLine = editor.document.getLineNumber(editor.selectionModel.selectionEnd)
+        return startLine == endLine
     }
 
     fun createCommitUrl(): String? {
