@@ -1,9 +1,8 @@
-package com.github.shiraji.opencommitongithub
+package com.github.shiraji.opencommitongithub.models
 
+import com.github.shiraji.opencommitongithub.helpers.OpenCommitOnGitHubDialogHelper
 import com.github.shiraji.subtract
 import com.github.shiraji.toMd5
-import com.intellij.ide.BrowserUtil
-import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.editor.Editor
@@ -16,20 +15,23 @@ import git4idea.repo.GitRepository
 import org.jetbrains.plugins.github.util.GithubUrlUtil
 import org.jetbrains.plugins.github.util.GithubUtil
 
-class OpenCommitOnGitHub : AnAction() {
+class OpenCommitOnGitHubModel {
 
-    override fun actionPerformed(e: AnActionEvent) {
-        val project = e.getData(CommonDataKeys.PROJECT) ?: return
-        if (project.isDisposed) return
-        val editor = e.getData(CommonDataKeys.EDITOR) ?: return
-        val virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
+    val project : Project?
+    val editor : Editor?
+    val virtualFile: VirtualFile?
 
-        val commitUrl = createCommitUrl(project, editor, virtualFile) ?: return
-
-        BrowserUtil.browse(commitUrl)
+    constructor(e: AnActionEvent) {
+        project = e.getData(CommonDataKeys.PROJECT)
+        editor = e.getData(CommonDataKeys.EDITOR)
+        virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE)
     }
 
-    private fun createCommitUrl(project: Project, editor: Editor, virtualFile: VirtualFile): String? {
+    fun createCommitUrl(): String? {
+        if(project== null || project.isDisposed || editor == null || virtualFile == null) {
+            return null
+        }
+
         val repository = GithubUtil.getGitRepository(project, virtualFile) ?: return null
         val githubUrl = createGithubUrl(repository) ?: return null
         val commitUrlPath = createCommitUrlPath(editor, virtualFile, repository) ?: return null
@@ -39,7 +41,7 @@ class OpenCommitOnGitHub : AnAction() {
     private fun createGithubUrl(repository: GitRepository): String? {
         val originUrl = repository.remotes.singleOrNull { it.name == "origin" }?.firstUrl
         if (originUrl == null) {
-            OpenCommitOnGitHubHelper().showNoOriginUrlMessage()
+            OpenCommitOnGitHubDialogHelper().showNoOriginUrlMessage()
             return null
         }
         return GithubUrlUtil.makeGithubRepoUrlFromRemoteUrl(originUrl, "https://" + GithubUrlUtil.getHostFromUrl(originUrl))
@@ -61,9 +63,4 @@ class OpenCommitOnGitHub : AnAction() {
         val revision = annotate.revisions?.single { it.revisionNumber == revisionHash } as GitFileRevision
         return revision.path.path.subtract(repository.gitDir.parent.presentableUrl.toString() + "/").toMd5()
     }
-
-    override fun update(e: AnActionEvent?) {
-        super.update(e)
-    }
-
 }
