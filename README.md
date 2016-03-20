@@ -14,7 +14,7 @@ Use the IDE's plugin manager to install the latest version of the plugin.
 
 or
 
-[Download](https://github.com/shiraji/open-commit-on-github/blob/master/open-commit-on-github.jar?raw=true) jar file and then go to Preferences > Plugins > Install plugin from disk... > Select the jar file you downloaded
+[Download](https://github.com/shiraji/open-commit-on-github/blob/master/open-commit-on-github.zip?raw=true) jar file and then go to Preferences > Plugins > Install plugin from disk... > Select the jar file you downloaded
 
 
 
