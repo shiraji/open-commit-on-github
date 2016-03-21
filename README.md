@@ -1,6 +1,6 @@
 # open-commit-on-github
 
-Open Commit on GitHub is a similar feature with GitHub integration's [Open on GitHub](https://www.jetbrains.com/help/idea/2016.1/using-github-integration.html?origin=old_help). This plugin open
+Open Commit on GitHub is a similar feature with GitHub integration's [Open on GitHub](https://www.jetbrains.com/help/idea/2016.1/using-github-integration.html?origin=old_help). This plugin opens the page that adds the selected line.
 
 ## How to use
 
