@@ -5,13 +5,14 @@
   <vendor email="isogai.shiraji@gmail.com" url="https://github.com/shiraji">Shiraji</vendor>
 
   <description><![CDATA[
-      Enter short description for your plugin here.<br>
-      <em>most HTML tags may be used</em>
+      This plugin add an editor popup menu. The menu opens GitHub page that the selected line is added.
     ]]></description>
 
   <change-notes><![CDATA[
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>
+        <p>1.0.0</p>
+        <ul>
+            <li>Initial release</li>
+        </ul>
     ]]>
   </change-notes>
 
