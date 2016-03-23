@@ -1,5 +1,9 @@
 # open-commit-on-github
 
+DEPRECATED
+
+Please use [Find Pull Request](https://github.com/shiraji/find-pull-request) plugin. I won't maintain this plugin.
+
 Open Commit on GitHub is a similar feature with GitHub integration's [Open on GitHub](https://www.jetbrains.com/help/idea/2016.1/using-github-integration.html?origin=old_help). This plugin opens the page that adds the selected line.
 
 ## How to use
