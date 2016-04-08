@@ -17,8 +17,7 @@ class OpenCommitOnGitHubAction : AnAction() {
         super.update(e)
 
         if(!OpenCommitOnGitHubModel(e).isEnable()) {
-            e.presentation.isEnabled = false
-            e.presentation.isVisible = false
+            e.presentation.isEnabledAndVisible = false
         }
     }
 
