@@ -19,6 +19,13 @@ intellij {
     version = '15.0.4'
     plugins  = ['github', 'git4idea']
     pluginName = 'Open Commit On GitHub'
+    updateSinceUntilBuild = false
+    sameSinceUntilBuild = false
+    publish {
+        username 'shiraji'
+        password System.getenv('PASSWORD')
+        pluginId '8297'
+    }
 }
 
 group 'navigation'
