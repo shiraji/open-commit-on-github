@@ -26,7 +26,7 @@ elif [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
 elif [ "$TRAVIS_BRANCH" != "$BRANCH" ]; then
   # Check branch
   echo "TRAVIS_BRANCH: '$TRAVIS_BRANCH' BRANCH: '$BRANCH'"
-elif [ "$IDEA_VERSION" != "LATEST-EAP-SNAPSHOT"]; then
+elif [ "$IDEA_VERSION" != "LATEST-EAP-SNAPSHOT" ]; then
   # Check IDEA version
   echo "IDEA_VERSION: '$IDEA_VERSION'"
 else
