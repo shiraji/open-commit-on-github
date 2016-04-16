@@ -28,6 +28,7 @@ elif [ "$TRAVIS_BRANCH" != "$BRANCH" ]; then
   echo "TRAVIS_BRANCH: '$TRAVIS_BRANCH' BRANCH: '$BRANCH'"
 else
   # Without snapshot
+  pwd
   cat build.gradle | grep -e "version \'"
   cat build.gradle | grep -e "version \'\d*\.\d*\.\d*\'"
 
