@@ -28,10 +28,10 @@ elif [ "$TRAVIS_BRANCH" != "$BRANCH" ]; then
   echo "TRAVIS_BRANCH: '$TRAVIS_BRANCH' BRANCH: '$BRANCH'"
 else
   # Without snapshot
-  pwd
-  cat build.gradle | egrep "version \'"
-  cat build.gradle | grep -e "version \'\d*\.\d*\.\d*\'"
-
-  echo "Start releasing..."
-  ./gradlew publishPlugin
+  if [ -f .travis/release ] then
+    echo "Start releasing..."
+    ./gradlew publishPlugin
+  else
+    echo "No .travis/release file"
+  fi
 fi
