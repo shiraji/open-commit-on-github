@@ -35,7 +35,7 @@ class OpenCommitOnGitHubModel {
             return false
         }
 
-        val repo = getRepository() ?: return false
+        val repo = GithubUtil.getGitRepository(project, virtualFile) ?: return false
         if (!GithubUtil.isRepositoryOnGitHub(repo)) return false
 
         val manager = GitUtil.getRepositoryManager(project)
@@ -52,8 +52,6 @@ class OpenCommitOnGitHubModel {
         val endLine = editor.document.getLineNumber(editor.selectionModel.selectionEnd)
         return startLine == endLine
     }
-
-    fun getRepository(): GitRepository? = GithubUtil.getGitRepository(project!!, virtualFile)
 
     fun createCommitUrl(): String? {
         if(project== null || project.isDisposed || editor == null || virtualFile == null) {
